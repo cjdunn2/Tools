@@ -85,44 +85,31 @@ def random_generate_VMS(vm_count: int) -> pd.DataFrame:
     for i in range(vm_count):
         configs.append(random.choice([config1, config2, config3, config4, config5, config6, config7, config8]))
     
-    # configs.append(VM_config(16, 4, 0.192))
-    # configs.append(VM_config(32, 8, 0.384))
-    # configs.append(VM_config(64, 16, 0.768))
-    # configs.append(VM_config(128, 32, 1.536))
-    # configs.append(VM_config(192, 48, 2.304))
-    # configs.append(VM_config(256, 64, 3.072))
-    # configs.append(VM_config(384, 96, 4.608))
-    
     #create a dataframe from the list of VM configurations
     df = pd.DataFrame(configs)
     
-    #return the dataframe
-    return df
-
-#this will be the function that will be called the run the data generation
-def generate_data(vm_count: int, workload_count: int):
-    #generate the VMs
-    vms = random_generate_VMS(vm_count)
-    
-    #generate the workloads
-    workloads = generate_workloads(workload_count)
-    
-    #check if the csv files exist delete them
     if os.path.exists('vms.csv'):
         os.remove('vms.csv')
         print('vms.csv deleted')
-    if os.path.exists('workloads.csv'):
-        os.remove('workloads.csv')
-        print('workloads.csv deleted')
         
-    #write the VMs to a csv
-    vms.to_csv('vms.csv', index=False)
+    df.to_csv('vms.csv', index=False)
     
-    #write the workloads to a csv
-    workloads.to_csv('workloads.csv', index=False)
+    #return the dataframe
+    # return df
+
+#this will be the function that will be called the run the data generation
+def generate_data(vm_count: int, workload_count: int):
     
-    #return the VMs and workloads
-    return vms, workloads
+    #generate the VMs
+    vms = random_generate_VMS(vm_count)    
+    #generate the workloads
+    workloads = generate_workloads_by_set(workload_count, 10)
+    
+
+
+if __name__ == '__main__':
+    generate_data(100, 100)
+    print('Done?')
 
 
 
