@@ -15,10 +15,13 @@ import data_generate as dg
 
 #sorting methods
 def allocate_1(vms, workloads):
+    vm_config_list = []
+    for i in range(len(vms)):
+        vm_config_list.append(vms[i][4])
     #start timer
     sTime = time.time()
     #sort the vms by cost from least to greatest
-    vms.sort(key=lambda x: x.cost)
+    vms.sort(key=lambda x: x[2])
     #it would be interesting to see how this would work if we sorted by ratio * cost
     # vms.sort(key=lambda x: x.ratio*x.cost)
     #this will be like results, this is where memiozation will come in
@@ -57,63 +60,59 @@ def allocate_1(vms, workloads):
     #but maybe I should do that in the frontend
     eTime = time.time()
     fTime = eTime - sTime
-    allocation = {v: k for k, v in allocation.items()}
-    return allocation, total_cost, fTime, missed
-
-#KnapSack algorithm
-def knapsack_vms(workloads, vms):
-    #start timer
-    sTime = time.time()
-    #missed workloads
-    missed = []
-    # Create a dictionary to store the cost and resource usage of each vm
-    vm_usage = {vm[0]: [vm[3], vm[1], vm[2]] for vm in vms}
-    # Create a dictionary to store the vm used for each workload
-    workload_vms = {}
-
-    # Sort the vm list by cost in ascending order
-    vms_sorted = sorted(vms, key=lambda x: x[3])
-
-    # Iterate through the workloads and assign them to the least expensive vm that has enough resources
-    for workload in workloads:
-        assigned_vm = None
-        for vm in vms_sorted:
-            if vm_usage[vm[0]][1] >= workload[1] and vm_usage[vm[0]][2] >= workload[2]:
-                assigned_vm = vm[0]
-                vm_usage[vm[0]][1] -= workload[1]
-                vm_usage[vm[0]][2] -= workload[2]
-                break
-        if assigned_vm is None:
-            missed.append(workload[0])
-        workload_vms[workload[0]] = assigned_vm
-
-    # Compute the total cost
-    total_cost = sum([vm_usage[vm][0] for vm in vm_usage])
-    eTime = time.time()
-    fTime = eTime - sTime
-    #this returns a dictionary of workload id = vm id, and the total cost
-    return workload_vms, total_cost, fTime, missed
-
+    # allocation = {v: k for k, v in allocation.items()}
+    # return allocation, total_cost, fTime, missed
+    if missed != []:
+        return total_cost, vm_config_list
+    else:
+        return 0, 0
 
         
 #learning methods
 def learning():
+    #opening the all time vm configuration file and parsing it
+    # all_time = open('all_time_vms.csv', 'w')
+    all_time_parsed = dh.all_time_parse('all_time.csv')
     
-    #this is gonna be a learning method that will learn from the results of the sorting methods
-    #it will learn the best vm configuration for each workload set
-    print('Learning method not yet implemented') 
+    #result list of tuples to see performance by worklaod set [cost, list_of_configaration]
+    results = []
+    
+    #read data
+    vms = dh.parse_csv('vms.csv')
+    # workloads = dh.parse_csv('workloads.csv')
+    for i in range(10):
+        workload = dh.parse_csv('workloads' + str(i) + '.csv')
+        cResult = allocate_1(vms, workload)
+        results.append(cResult)
+    for i in range(len(results)):
+        if results[i][0] != 0:
+            if results[i][0] < all_time_parsed[i][1]:
+                all_time_parsed[i][1] = results[i][0]
+                all_time_parsed[i][2] = results[i][1]
+        else: 
+            continue
+    #write the all time results back to a csv
+    dh.all_time_write(all_time_parsed)
+                          
+    #This should return a list of tuples of the form (total_cost, fTime)
+    print(all_time_parsed, sep='\n')
+
+
 
 
 
 #main
 if __name__ == '__main__':
     
-    #generate data
-    # dg.generate_data(1000, 1000)
+    learning()
     
-    #read data
-    vms = dh.parse_csv('vms.csv')
-    workloads = dh.parse_csv('workloads.csv')
+    #now I need to memoize the results of the sorting methods and only ever keep them if they are better than the all time resutls
+    #I could give a score to the run using some sort of metrics and then compare the score with the all time score. 
+    #If the score is better than the all time score then I keep the results and replace the all time score with the new score
+    
+    #how do I score the results?
+    #time  shouldnt matter, thats an algorithm metric not a virtual machine metric
+    #cost is the only metric that matters
     
     """I think the expirement should do the following:
     
@@ -132,5 +131,4 @@ if __name__ == '__main__':
     
     
     
-    print('Hey there!')
       

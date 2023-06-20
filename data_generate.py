@@ -6,12 +6,13 @@ import csv
 
 #using class structure im gonna make different configurations of vms
 class VM_config:
-    def __init__(self, memory: float, cpu: float, cost: float) -> None:
+    def __init__(self, memory: float, cpu: float, cost: float, config_number: float) -> None:
         self.memory = memory
         self.cpu = cpu
         self.cost = cost
+        self.config_number = config_number
         self.ratio = memory/cpu
-        self.name = 'm' + str(memory) + 'c' + str(cpu)
+        # self.name = 'm' + str(memory) + 'c' + str(cpu)
 
 #workload class if we were to be able to know such a thing
 class Workload_config:
@@ -71,22 +72,35 @@ def generate_workloads(num_workloads: int, rating: int) -> pd.DataFrame:
 def random_generate_VMS(vm_count: int) -> pd.DataFrame:
     #create a list of VM configurations
     #Memory, CPU, Cost
+    
     configs = []
-    config1 = VM_config(8, 2, 0.096)
-    config2 = VM_config(16, 4, 0.192)
-    config3 = VM_config(32, 8, 0.384)
-    config4 = VM_config(64, 16, 0.768)
-    config5 = VM_config(128, 32, 1.536)
-    config6 = VM_config(192, 48, 2.304)
-    config7 = VM_config(256, 64, 3.072)
-    config8 = VM_config(384, 96, 4.608)
+    config1 = VM_config(8, 2, 0.096, 1)
+    config2 = VM_config(16, 4, 0.192, 2)
+    config3 = VM_config(32, 8, 0.384, 3)
+    config4 = VM_config(64, 16, 0.768, 4)
+    config5 = VM_config(128, 32, 1.536, 5)
+    config6 = VM_config(192, 48, 2.304, 6)
+    config7 = VM_config(256, 64, 3.072, 7)
+    config8 = VM_config(384, 96, 4.608, 8)
+    
+    columns = ['memory', 'cpu', 'cost', 'ratio', 'config_number']
+    #create a dataframe from the list of VM configurations
+    df = pd.DataFrame(columns=columns, index=None)
+    
+    if(vm_count == 0):
+        for i in range(random.randint(1, 100)):
+            # configs.append(random.choice([config1, config2, config3, config4, config5, config6, config7, config8]))
+            temp = random.choice([config1, config2, config3, config4, config5, config6, config7, config8])
+            df2 = pd.DataFrame({'memory': [temp.memory], 'cpu': [temp.cpu], 'cost': [temp.cost], 'ratio': [temp.ratio], 'config_number': [temp.config_number]})
+            df = df.append(df2)
     
     #randomly append configurations to the list for vm_count
     for i in range(vm_count):
-        configs.append(random.choice([config1, config2, config3, config4, config5, config6, config7, config8]))
+        temp = random.choice([config1, config2, config3, config4, config5, config6, config7, config8])
+        df2 = pd.DataFrame({'memory': [temp.memory], 'cpu': [temp.cpu], 'cost': [temp.cost], 'ratio': [temp.ratio], 'config_number': [temp.config_number]})
+        df = df.append(df2)
+
     
-    #create a dataframe from the list of VM configurations
-    df = pd.DataFrame(configs)
     
     if os.path.exists('vms.csv'):
         os.remove('vms.csv')
@@ -100,10 +114,11 @@ def random_generate_VMS(vm_count: int) -> pd.DataFrame:
 #this will be the function that will be called the run the data generation
 def generate_data(vm_count: int, workload_count: int):
     
-    #generate the VMs
+    #generate the VMs, if given zero, will generate random amount 0..100
     vms = random_generate_VMS(vm_count)    
     #generate the workloads
-    workloads = generate_workloads_by_set(workload_count, 10)
+    '''COMMENTED OUT BECAUSE WE ARE KEEPING THE WORKLOADS STANDARDIZED FOR NOW'''
+    # workloads = generate_workloads_by_set(workload_count, 10)
     
 
 
