@@ -110,6 +110,8 @@ def random_generate_VMS(vm_count: int) -> pd.DataFrame:
     
     #return the dataframe
     # return df
+    
+
 
 #this will be the function that will be called the run the data generation
 def generate_data(vm_count: int, workload_count: int):
